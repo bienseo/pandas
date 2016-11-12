@@ -751,16 +751,7 @@ class Base(object):
                 expected.index = s.index._shallow_copy(freq=freq)
                 assert_index_equal(result.index, expected.index)
                 self.assertEqual(result.index.freq, expected.index.freq)
-
-                if (method == 'size' and
-                    isinstance(result.index, PeriodIndex) and
-                        freq in ['M', 'D']):
-                    # GH12871 - TODO: name should propagate, but currently
-                    # doesn't on lower / same frequency with PeriodIndex
-                    assert_series_equal(result, expected, check_dtype=False)
-
-                else:
-                    assert_series_equal(result, expected, check_dtype=False)
+                assert_series_equal(result, expected, check_dtype=False)
 
     def test_resample_empty_dataframe(self):
         # GH13212
@@ -1842,10 +1833,12 @@ class TestDatetimeIndex(Base, tm.TestCase):
         tm.assert_series_equal(result['foo'], foo_exp)
         tm.assert_series_equal(result['bar'], bar_exp)
 
+        # this is a MI Series, so comparing the names of the results
+        # doesn't make sense
         result = ts.resample('M').aggregate({'foo': lambda x: x.mean(),
                                              'bar': lambda x: x.std(ddof=1)})
-        tm.assert_series_equal(result['foo'], foo_exp)
-        tm.assert_series_equal(result['bar'], bar_exp)
+        tm.assert_series_equal(result['foo'], foo_exp, check_names=False)
+        tm.assert_series_equal(result['bar'], bar_exp, check_names=False)
 
     def test_resample_unequal_times(self):
         # #1772

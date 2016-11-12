@@ -3903,7 +3903,7 @@ class TestGroupBy(MixIn, tm.TestCase):
         expected = set(
             ['A', 'B', 'C', 'agg', 'aggregate', 'apply', 'boxplot', 'filter',
              'first', 'get_group', 'groups', 'hist', 'indices', 'last', 'max',
-             'mean', 'median', 'min', 'name', 'ngroups', 'nth', 'ohlc', 'plot',
+             'mean', 'median', 'min', 'ngroups', 'nth', 'ohlc', 'plot',
              'prod', 'size', 'std', 'sum', 'transform', 'var', 'sem', 'count',
              'nunique', 'head', 'describe', 'cummax', 'quantile',
              'rank', 'cumprod', 'tail', 'resample', 'cummin', 'fillna',
