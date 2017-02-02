@@ -6,7 +6,8 @@ from numpy.random import RandomState
 from numpy import nan
 from datetime import datetime
 from itertools import permutations
-from pandas import Series, Categorical, CategoricalIndex, Index
+from pandas import (Series, Categorical, CategoricalIndex,
+                    Index, IntervalIndex)
 import pandas as pd
 
 from pandas import compat
@@ -478,8 +479,9 @@ class TestValueCounts(tm.TestCase):
 
         # tm.assertIsInstance(factor, n)
         result = algos.value_counts(factor)
-        breaks = [-1.192, -0.535, 0.121, 0.777, 1.433]
-        expected_index = pd.IntervalIndex.from_breaks(breaks)
+        breaks = [-1.194, -0.535, 0.121, 0.777, 1.433]
+        expected_index = pd.IntervalIndex.from_breaks(
+            breaks).astype('category')
         expected = Series([1, 1, 1, 1],
                           index=expected_index)
         tm.assert_series_equal(result.sort_index(), expected.sort_index())
@@ -487,13 +489,15 @@ class TestValueCounts(tm.TestCase):
     def test_value_counts_bins(self):
         s = [1, 2, 3, 4]
         result = algos.value_counts(s, bins=1)
-        self.assertEqual(result.tolist(), [4])
-        self.assertEqual(result.index[0], pd.Interval(0.999, 4.0))
+        expected = Series([4],
+                          index=IntervalIndex.from_tuples([(0.996, 4.0)]))
+        tm.assert_series_equal(result, expected)
 
         result = algos.value_counts(s, bins=2, sort=False)
-        self.assertEqual(result.tolist(), [2, 2])
-        self.assertEqual(result.index.min(), pd.Interval(0.999, 2.5))
-        self.assertEqual(result.index.max(), pd.Interval(2.5, 4.0))
+        expected = Series([2, 2],
+                          index=IntervalIndex.from_tuples([(0.996, 2.5),
+                                                           (2.5, 4.0)]))
+        tm.assert_series_equal(result, expected)
 
     def test_value_counts_dtypes(self):
         result = algos.value_counts([1, 1.])
@@ -544,7 +548,7 @@ class TestValueCounts(tm.TestCase):
         s = Series(pd.Categorical(list('aaabbc')))
         result = s.value_counts()
         expected = pd.Series([3, 2, 1],
-                             index=pd.CategoricalIndex(['a', 'b', 'c']))
+                             index=CategoricalIndex(['a', 'b', 'c']))
         tm.assert_series_equal(result, expected, check_index_type=True)
 
         # preserve order?
@@ -557,13 +561,13 @@ class TestValueCounts(tm.TestCase):
         s = Series(pd.Categorical(list('aaaaabbbcc')))  # 4,3,2,1 (nan)
         s.iloc[1] = np.nan
         result = s.value_counts()
-        expected = pd.Series([4, 3, 2], index=pd.CategoricalIndex(
+        expected = pd.Series([4, 3, 2], index=CategoricalIndex(
             ['a', 'b', 'c'], categories=['a', 'b', 'c']))
         tm.assert_series_equal(result, expected, check_index_type=True)
         result = s.value_counts(dropna=False)
         expected = pd.Series([
             4, 3, 2, 1
-        ], index=pd.CategoricalIndex(['a', 'b', 'c', np.nan]))
+        ], index=CategoricalIndex(['a', 'b', 'c', np.nan]))
         tm.assert_series_equal(result, expected, check_index_type=True)
 
         # out of order
@@ -571,12 +575,12 @@ class TestValueCounts(tm.TestCase):
             list('aaaaabbbcc'), ordered=True, categories=['b', 'a', 'c']))
         s.iloc[1] = np.nan
         result = s.value_counts()
-        expected = pd.Series([4, 3, 2], index=pd.CategoricalIndex(
+        expected = pd.Series([4, 3, 2], index=CategoricalIndex(
             ['a', 'b', 'c'], categories=['b', 'a', 'c'], ordered=True))
         tm.assert_series_equal(result, expected, check_index_type=True)
 
         result = s.value_counts(dropna=False)
-        expected = pd.Series([4, 3, 2, 1], index=pd.CategoricalIndex(
+        expected = pd.Series([4, 3, 2, 1], index=CategoricalIndex(
             ['a', 'b', 'c', np.nan], categories=['b', 'a', 'c'], ordered=True))
         tm.assert_series_equal(result, expected, check_index_type=True)
 

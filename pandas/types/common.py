@@ -7,6 +7,7 @@ from pandas._libs import algos, lib
 from .dtypes import (CategoricalDtype, CategoricalDtypeType,
                      DatetimeTZDtype, DatetimeTZDtypeType,
                      PeriodDtype, PeriodDtypeType,
+                     IntervalDtype, IntervalDtypeType,
                      ExtensionDtype)
 from .generic import (ABCCategorical, ABCPeriodIndex,
                       ABCDatetimeIndex, ABCSeries,
@@ -109,6 +110,10 @@ def is_timedelta64_dtype(arr_or_dtype):
 
 def is_period_dtype(arr_or_dtype):
     return PeriodDtype.is_dtype(arr_or_dtype)
+
+
+def is_interval_dtype(arr_or_dtype):
+    return IntervalDtype.is_dtype(arr_or_dtype)
 
 
 def is_categorical_dtype(arr_or_dtype):
@@ -353,6 +358,8 @@ def _coerce_to_dtype(dtype):
         dtype = DatetimeTZDtype(dtype)
     elif is_period_dtype(dtype):
         dtype = PeriodDtype(dtype)
+    elif is_interval_dtype(dtype):
+        dtype = IntervalDtype(dtype)
     else:
         dtype = np.dtype(dtype)
     return dtype
@@ -369,6 +376,8 @@ def _get_dtype(arr_or_dtype):
         return arr_or_dtype
     elif isinstance(arr_or_dtype, PeriodDtype):
         return arr_or_dtype
+    elif isinstance(arr_or_dtype, IntervalDtype):
+        return arr_or_dtype
     elif isinstance(arr_or_dtype, string_types):
         if is_categorical_dtype(arr_or_dtype):
             return CategoricalDtype.construct_from_string(arr_or_dtype)
@@ -376,6 +385,8 @@ def _get_dtype(arr_or_dtype):
             return DatetimeTZDtype.construct_from_string(arr_or_dtype)
         elif is_period_dtype(arr_or_dtype):
             return PeriodDtype.construct_from_string(arr_or_dtype)
+        elif is_interval_dtype(arr_or_dtype):
+            return IntervalDtype.construct_from_string(arr_or_dtype)
 
     if hasattr(arr_or_dtype, 'dtype'):
         arr_or_dtype = arr_or_dtype.dtype
@@ -391,6 +402,8 @@ def _get_dtype_type(arr_or_dtype):
         return CategoricalDtypeType
     elif isinstance(arr_or_dtype, DatetimeTZDtype):
         return DatetimeTZDtypeType
+    elif isinstance(arr_or_dtype, IntervalDtype):
+        return IntervalDtypeType
     elif isinstance(arr_or_dtype, PeriodDtype):
         return PeriodDtypeType
     elif isinstance(arr_or_dtype, string_types):
@@ -400,6 +413,8 @@ def _get_dtype_type(arr_or_dtype):
             return DatetimeTZDtypeType
         elif is_period_dtype(arr_or_dtype):
             return PeriodDtypeType
+        elif is_interval_dtype(arr_or_dtype):
+            return IntervalDtypeType
         return _get_dtype_type(np.dtype(arr_or_dtype))
     try:
         return arr_or_dtype.dtype.type
@@ -484,6 +499,8 @@ def pandas_dtype(dtype):
         return dtype
     elif isinstance(dtype, CategoricalDtype):
         return dtype
+    elif isinstance(dtype, IntervalDtype):
+        return dtype
     elif isinstance(dtype, string_types):
         try:
             return DatetimeTZDtype.construct_from_string(dtype)
@@ -494,6 +511,12 @@ def pandas_dtype(dtype):
             # do not parse string like U as period[U]
             try:
                 return PeriodDtype.construct_from_string(dtype)
+            except TypeError:
+                pass
+
+        elif dtype.startswith('interval[') or dtype.startswith('Interval['):
+            try:
+                return IntervalDtype.construct_from_string(dtype)
             except TypeError:
                 pass
 

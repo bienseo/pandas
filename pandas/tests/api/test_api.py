@@ -51,7 +51,7 @@ class TestPDApi(Base, tm.TestCase):
                'Period', 'PeriodIndex', 'RangeIndex', 'UInt64Index',
                'Series', 'SparseArray', 'SparseDataFrame',
                'SparseSeries', 'TimeGrouper', 'Timedelta',
-               'TimedeltaIndex', 'Timestamp']
+               'TimedeltaIndex', 'Timestamp', 'Interval', 'IntervalIndex']
 
     # these are already deprecated; awaiting removal
     deprecated_classes = ['Panel4D', 'SparseList', 'Expr', 'Term']
@@ -64,7 +64,7 @@ class TestPDApi(Base, tm.TestCase):
 
     # top-level functions
     funcs = ['bdate_range', 'concat', 'crosstab', 'cut',
-             'date_range', 'eval',
+             'date_range', 'interval_range', 'eval',
              'factorize', 'get_dummies', 'get_store',
              'infer_freq', 'isnull', 'lreshape',
              'melt', 'notnull', 'offsets',
@@ -142,6 +142,7 @@ class TestTypes(Base, tm.TestCase):
                'is_string_dtype', 'is_signed_integer_dtype',
                'is_timedelta64_dtype', 'is_timedelta64_ns_dtype',
                'is_unsigned_integer_dtype', 'is_period',
+               'is_interval', 'is_interval_dtype',
                'is_period_dtype', 'is_re', 'is_re_compilable',
                'is_dict_like', 'is_iterator',
                'is_list_like', 'is_hashable',

@@ -11,6 +11,7 @@ Highlights include:
 
 - Building pandas for development now requires ``cython >= 0.23`` (:issue:`14831`)
 - The ``.ix`` indexer has been deprecated, see :ref:`here <whatsnew_0200.api_breaking.deprecate_ix>`
+- Addition of an ``IntervalIndex`` and ``Interval`` scalar type, see :ref:`here <whatsnew_0200.enhancements.intervalindex>`
 - Switched the test framework to `pytest`_ (:issue:`13097`)
 - A new orient for JSON serialization, ``orient='table'``, that uses the Table Schema spec, see :ref:`here <whatsnew_0200.enhancements.table_schema>`
 
@@ -262,6 +263,36 @@ To convert a ``SparseDataFrame`` back to sparse SciPy matrix in COO format, you 
 .. ipython:: python
 
    sdf.to_coo()
+
+.. _whatsnew_0200.enhancements.intervalindex:
+
+IntervalIndex
+^^^^^^^^^^^^^
+
+pandas has gain an ``IntervalIndex`` with its own dtype, ``interval`` as well as the ``Interval`` scalar type. These allow first-class support for interval
+notation, specifically as return type for ``pd.cut`` and ``pd.qcut``. (:issue:`7640`, :issue:`8625`)
+
+**Previous behavior**:
+
+.. code-block:: ipython
+
+   In [2]: pd.cut(range(3), 2)
+   Out[2]:
+   [(-0.002, 1], (-0.002, 1], (1, 2]]
+   Categories (2, object): [(-0.002, 1] < (1, 2]]
+
+   # the returned categories are strings, representing Intervals
+   In [3]: pd.cut(range(3), 2).categories
+   Out[3]: Index(['(-0.002, 1]', '(1, 2]'], dtype='object')
+
+**New behavior**:
+
+.. ipython:: python
+
+   c = pd.cut(range(3), 2)
+   c
+   c.categories
+   pd.api.types.is_interval_dtype(c.categories)
 
 .. _whatsnew_0200.enhancements.other:
 
