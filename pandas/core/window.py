@@ -1652,7 +1652,8 @@ class EWM(_Rolling):
 
 
 def _flex_binary_moment(arg1, arg2, f, pairwise=False):
-    from pandas import Series, DataFrame, Panel
+    from pandas import Series, DataFrame
+
     if not (isinstance(arg1, (np.ndarray, Series, DataFrame)) and
             isinstance(arg2, (np.ndarray, Series, DataFrame))):
         raise TypeError("arguments to moment function must be of type "
@@ -1703,12 +1704,19 @@ def _flex_binary_moment(arg1, arg2, f, pairwise=False):
                         else:
                             results[i][j] = f(*_prep_binary(arg1.iloc[:, i],
                                                             arg2.iloc[:, j]))
+
+                from pandas import Panel
                 p = Panel.from_dict(results).swapaxes('items', 'major')
                 if len(p.major_axis) > 0:
                     p.major_axis = arg1.columns[p.major_axis]
                 if len(p.minor_axis) > 0:
                     p.minor_axis = arg2.columns[p.minor_axis]
-                return p
+
+                result = (p.to_frame(filter_observations=False)
+                           .T
+                          )
+                return result
+
             else:
                 raise ValueError("'pairwise' is not True/False")
         else:

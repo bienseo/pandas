@@ -13,6 +13,8 @@ Highlights include:
 - The ``.ix`` indexer has been deprecated, see :ref:`here <whatsnew_0200.api_breaking.deprecate_ix>`
 - Switched the test framework to `pytest`_ (:issue:`13097`)
 - A new orient for JSON serialization, ``orient='table'``, that uses the Table Schema spec, see :ref:`here <whatsnew_0200.enhancements.table_schema>`
+- Window Binary Corr/Cov operations return a MultiIndex DataFrame rather than a Panel, see :ref:`here <whhatsnew_0200.api_breaking.rolling_pairwise>`
+
 
 .. _pytest: http://doc.pytest.org/en/latest/
 
@@ -709,6 +711,48 @@ New Behavior:
    df.groupby('A').describe()
 
    df.groupby('A').agg([np.mean, np.std, np.min, np.max])
+
+.. _whatsnew_0200.api_breaking.rolling_pairwise:
+
+Window Binary Corr/Cov operations return a MultiIndex DataFrame
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A binary window operation, like ``.corr()`` or ``.cov()``, when operating on a ``.rolling(..)``, ``.expanding(..)``, or ``.ewm(..)`` object,
+will now return a 2-level ``MultiIndexed DataFrame`` rather than a ``Panel``. These are equivalent in function,
+but MultiIndexed DataFrames enjoy more support in pandas.
+See the section on :ref:`Windowed Binary Operations <stats.moments.binary>` for more information. (:issue:`15677`)
+
+.. ipython:: python
+
+   np.random.seed(1234)
+   df = DataFrame(np.random.rand(100, 2))
+   df
+
+Old Behavior:
+
+.. code-block:: ipython
+
+   In [28]: df.rolling(12).corr()
+   Out[28]:
+   <class 'pandas.core.panel.Panel'>
+   Dimensions: 100 (items) x 2 (major_axis) x 2 (minor_axis)
+   Items axis: 0 to 99
+   Major_axis axis: 0 to 1
+   Minor_axis axis: 0 to 1
+
+New Behavior:
+
+.. ipython:: python
+
+   res = df.rolling(12).corr()
+   res
+
+Retrieving a correlation matrix for a specified index
+
+.. ipython:: python
+
+   res.iloc[-1].unstack()
+
 
 .. _whatsnew_0200.api_breaking.hdfstore_where:
 
