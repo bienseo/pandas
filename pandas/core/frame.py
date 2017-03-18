@@ -1515,6 +1515,23 @@ class DataFrame(NDFrame):
         from pandas.io.feather_format import to_feather
         to_feather(self, fname)
 
+    def to_parquet(self, fname, compression=None):
+        """
+        write out the binary parquet for DataFrames
+
+        .. versionadded:: 0.20.0
+
+        Parameters
+        ----------
+        fname : str
+            string file path
+        compression : str, optional
+            compression method, includes {'gzip', 'snappy'}
+
+        """
+        from pandas.io.parquet import to_parquet
+        to_parquet(self, fname, compression=compression)
+
     @Substitution(header='Write out column names. If a list of string is given, \
 it is assumed to be aliases for the column names')
     @Appender(fmt.docstring_to_string, indents=1)
