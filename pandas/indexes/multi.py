@@ -1194,7 +1194,7 @@ class MultiIndex(Index):
         except LookupError:
             return False
 
-    _is_contained_in = __contains__
+    contains = __contains__
 
     def __reduce__(self):
         """Necessary for making this object picklable"""
